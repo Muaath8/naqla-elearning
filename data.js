@@ -1,6 +1,6 @@
 const YT = {
-  intro: "https://www.youtube.com/embed/ysz5S6PUM-U", // بدّل لاحقًا
-  alt:   "https://www.youtube.com/embed/aqz-KE-bpKQ"   // بدّل لاحقًا
+  intro: "https://www.youtube.com/embed/ysz5S6PUM-U", // يمكن وضع watch?v=ID أو حتى ID فقط
+  alt:   "https://www.youtube.com/embed/aqz-KE-bpKQ"
 };
 
 const makeModule = (title, video, summary) => ({
