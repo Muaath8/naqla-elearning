@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>دورات إلكترونية للشباب/ات - مبادرة نقلة</title>
-  <meta name="description" content="منصة عربية مجانية لدورات الشباب/ات العاملين في منظمات المجتمع المدني – مبادرة نقلة">
+  <meta name="description" content="منصة عربية مجانية لدورات الشباب/ات العاملين في منظمات المجتمع المدني – مبادرة نقلة" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800;900&display=swap" rel="stylesheet">
@@ -15,16 +15,20 @@
     <nav class="nav">
       <a class="brand" href="#"><span class="logo" aria-hidden="true"></span><span class="brand-title">مبادرة نقلة – منصة الدورات</span></a>
       <div class="actions">
-        <button id="toggleTheme" class="btn secondary" aria-pressed="false">🌗 الوضع</button>
+        <button id="toggleTheme" class="btn secondary" aria-pressed="false" title="تبديل الوضع">🌗 الوضع</button>
         <a class="btn" href="#courses">ابدأ الآن</a>
       </div>
     </nav>
+
     <section class="hero">
       <div class="hero-card">
         <h1 class="title">تعلم مجاني بالعربي – تسلسل احترافي للوحدات</h1>
-        <p class="lead">شاهد الفيديو ثم الاختبار، وانتقل للوحدة التالية عبر زر <strong>التالي</strong>. تقدّمك محفوظ محليًا.</p>
+        <p class="lead">شاهد الفيديو ثم الاختبار، وانتقل للوحدة التالية عبر زر <strong>التالي</strong>. تقدّمك محفوظ على جهازك.</p>
         <div class="toolbar" role="search">
-          <div class="search"><span>🔎</span><input id="q" type="search" placeholder="ابحث: محاسبة، تسويق، بيانات، ذكاء..." autocomplete="off"></div>
+          <div class="search">
+            <span aria-hidden="true">🔎</span>
+            <input id="q" type="search" placeholder="ابحث: محاسبة، تسويق، بيانات، ذكاء..." autocomplete="off">
+          </div>
           <button class="btn ghost" onclick="document.getElementById('courses').scrollIntoView({behavior:'smooth'})">تصفّح جميع الدورات</button>
         </div>
       </div>
@@ -51,7 +55,7 @@
       <div id="grid" class="grid"></div>
     </section>
 
-    <!-- نافذة الدورة بالتسلسل (فيديو -> اختبار -> التالي) -->
+    <!-- نافذة الدورة (تسلسل: فيديو -> اختبار -> التالي) -->
     <dialog id="courseModal" aria-labelledby="modalTitle">
       <div class="modal-head">
         <div>
@@ -94,7 +98,7 @@
   <footer class="container">
     <div class="links">
       <span>© <span id="year"></span> مبادرة نقلة</span>
-      <a href="https://github.com">يعمل على GitHub Pages</a>
+      <a href="#">يعمل على GitHub Pages</a>
     </div>
   </footer>
 
