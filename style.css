@@ -1,0 +1,62 @@
+body {
+  font-family: "Cairo", sans-serif;
+  margin: 0;
+  background: #f9f9f9;
+  color: #222;
+  line-height: 1.7;
+}
+
+header {
+  background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+  color: white;
+  text-align: center;
+  padding: 30px 10px;
+  border-bottom-left-radius: 30px;
+  border-bottom-right-radius: 30px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 2.2em;
+}
+
+#courses {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+  padding: 30px;
+}
+
+.course {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: transform 0.3s;
+}
+
+.course:hover {
+  transform: translateY(-5px);
+}
+
+.course h2 {
+  color: #0077cc;
+}
+
+.modules, .activity, .quiz, iframe {
+  margin: 15px 0;
+}
+
+button {
+  background: #0077cc;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #005fa3;
+}
