@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>مبادرة نقلة – الدورة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="container">
+  <nav class="nav">
+    <a class="brand" href="index.html"><span class="logo"></span><span class="brand-title">مبادرة نقلة – العودة للدورات</span></a>
+    <div class="actions">
+      <button id="toggleTheme" class="btn secondary" aria-pressed="false">🌗 الوضع</button>
+    </div>
+  </nav>
+</header>
+
+<main class="container">
+  <dialog id="dlg" open>
+    <div class="modal-head">
+      <div>
+        <h3 id="courseTitle" class="title" style="margin:0 0 4px"></h3>
+        <div class="muted"><span id="unitIndex">الوحدة 1</span> · <span id="progressText">0%</span></div>
+      </div>
+      <a class="close" href="index.html">✕</a>
+    </div>
+    <div class="modal-body">
+      <div class="flow">
+        <aside class="flow-sidebar">
+          <h4 class="title">وحدات الدورة</h4>
+          <ol id="unitList" class="unit-list"></ol>
+        </aside>
+        <section class="flow-main">
+          <div class="section">
+            <div class="section-head"><strong id="sectionTitle">الفيديو</strong></div>
+            <div class="section-body" id="stageBody"></div>
+          </div>
+          <div class="section">
+            <div class="section-head"><strong>التنقل</strong></div>
+            <div class="section-body nav-row">
+              <button class="btn secondary" id="prevBtn">السابق</button>
+              <button class="btn" id="nextBtn">التالي</button>
+              <div class="progress"><span id="bar" style="width:0%"></span></div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-head"><strong>حالة الإنجاز</strong></div>
+            <div class="section-body" id="statusRow"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </dialog>
+</main>
+
+<footer class="container">
+  <div class="links">
+    <span>© <span id="year"></span> مبادرة نقلة</span>
+  </div>
+</footer>
+
+<script src="data.js"></script>
+<script>
+  // عناصر
+  const unitList = document.getElementById('unitList');
+  const stageBody = document.getElementById('stageBody');
+  const sectionTitle = document.getElementById('sectionTitle');
+  const unitIndexLbl = document.getElementById('unitIndex');
+  const progressText = document.getElementById('progressText');
+  const bar = document.getElementById('bar');
+  const statusRow = document.getElementById('statusRow');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // تبديل الثيم
+  document.getElementById('toggleTheme')?.addEventListener('click', (e)=>{
+    const light = document.documentElement.getAttribute('data-theme') === 'light';
+    document.documentElement.setAttribute('data-theme', light ? 'dark' : 'light');
+    e.currentTarget.setAttribute('aria-pressed', String(!light));
+  });
+
+  // قراءة اسم الدورة من الرابط
+  const params = new URLSearchParams(location.search);
+  const courseId = params.get('course');
+  const course = COURSES.find(c => c.id === courseId) || COURSES[0];
+  document.getElementById('courseTitle').textContent = course.id;
+
+  // حالة
+  let uIndex = 0;      // رقم الوحدة
+  let stage = "video"; // video -> quiz
+
+  function storageKey(){ return `naqla:progress:${course.id}`;}
+  function loadProgress(){ try{ return JSON.parse(localStorage.getItem(storageKey())||'{}'); }catch{ return {}; } }
+  function saveProgress(data){ localStorage.setItem(storageKey(), JSON.stringify(data)); }
+
+  function buildSidebar(){
+    unitList.innerHTML = course.modules.map((m,i)=>{
+      const prog = loadProgress();
+      const unitProg = prog[i]||{};
+      const done = unitProg.passed ? 'done' : '';
+      const activeCls = (i===uIndex) ? 'active' : '';
+      return `<li class="${done} ${activeCls}">${i+1}. ${m.title}</li>`;
+    }).join('');
+  }
+
+  function renderStage(){
+    const m = course.modules[uIndex];
+    unitIndexLbl.textContent = `الوحدة ${uIndex+1} / ${course.modules.length}`;
+
+    const prog = loadProgress();
+    const totalUnits = course.modules.length;
+    const passedUnits = Object.values(prog).filter(p=>p?.passed).length;
+    const pct = Math.round((passedUnits/totalUnits)*100);
+    progressText.textContent = `${pct}%`;
+    bar.style.width = pct + '%';
+
+    prevBtn.disabled = (uIndex===0 && stage==="video");
+    nextBtn.textContent = (stage==="video") ? "التالي (الأسئلة)" : (uIndex===course.modules.length-1 ? "إنهاء الدورة" : "التالي (الوحدة التالية)");
+
+    if(stage==="video"){
+      sectionTitle.textContent = "الفيديو";
+      stageBody.innerHTML = `
+        <div style="margin-bottom:10px" class="meta">${m.summary}</div>
+        <iframe src="${m.video}"
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen title="${m.title}"></iframe>`;
+    }else{
+      sectionTitle.textContent = "الملخص والاختبار";
+      stageBody.innerHTML = `
+        <p class="meta">${m.summary}</p>
+        <div class="quiz">
+          ${m.quiz.map((Q,i)=>`
+            <div class="q">
+              <strong>${i+1}. ${Q.q}</strong><br>
+              ${Q.options.map((opt,j)=>`
+                <label><input type="radio" name="q${i}" value="${j}"> ${opt}</label>
+              `).join("<br>")}
+            </div>`).join("")}
+          <button class="btn" onclick="grade()">تحقق من الإجابات</button>
+          <span id="quizMsg" class="meta" style="margin-inline-start:8px"></span>
+        </div>`;
+      const unitProg = (prog[uIndex]||{});
+      if(unitProg.passed){ document.getElementById('quizMsg').textContent = `مكتمل ✅ (أُجيز سابقًا)`; }
+    }
+
+    const unitProg = (loadProgress()[uIndex]||{});
+    statusRow.innerHTML = `
+      <span class="chip ${unitProg?.watched?'ok':'warn'}">الفيديو: ${unitProg?.watched?'مشاهد':'غير مكتمل'}</span>
+      <span class="chip ${unitProg?.passed?'ok':'warn'}">الاختبار: ${unitProg?.passed?'ناجح':'غير مكتمل'}</span>`;
+
+    buildSidebar();
+  }
+
+  function grade(){
+    const m = course.modules[uIndex];
+    let score=0;
+    m.quiz.forEach((Q,i)=>{
+      const v = document.querySelector(`input[name=q${i}]:checked`);
+      if(v && Number(v.value)===Q.a) score++;
+    });
+    const pct = Math.round((score/m.quiz.length)*100);
+    const prog = loadProgress();
+    prog[uIndex] = prog[uIndex]||{};
+    prog[uIndex].passed = (pct>=70);
+    saveProgress(prog);
+    const msg = document.getElementById('quizMsg');
+    msg.textContent = `نتيجتك: ${score} من ${m.quiz.length} (${pct}%) ${prog[uIndex].passed?'✅ ناجح':'❗ أقل من 70%'}`;
+    renderStage();
+  }
+  window.grade = grade;
+
+  prevBtn.onclick = ()=>{
+    if(stage==="quiz"){ stage="video"; renderStage(); return; }
+    if(uIndex>0){ uIndex--; stage="quiz"; renderStage(); }
+  };
+  nextBtn.onclick = ()=>{
+    const prog = loadProgress();
+    const unitProg = prog[uIndex]||{};
+    if(stage==="video"){
+      unitProg.watched = true;
+      prog[uIndex]=unitProg; saveProgress(prog);
+      stage="quiz"; renderStage(); return;
+    }else{
+      if(!unitProg.passed){ alert("أكمل الاختبار بنجاح أولًا (70% فأعلى)."); return; }
+      if(uIndex < course.modules.length-1){ uIndex++; stage="video"; renderStage(); }
+      else { alert("تهانينا! أتممت الدورة ✅"); }
+    }
+  };
+
+  buildSidebar();
+  renderStage();
+</script>
+</body>
+</html>
