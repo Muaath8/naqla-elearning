@@ -1,0 +1,343 @@
+index.html
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Sun, Moon, Search, Award, CheckCircle2, XCircle, Play, GraduationCap, Shield, BarChart3 } from "lucide-react";
+
+/**
+ * Naqla eLearning – React single-file app
+ * - Arabic (RTL) UI
+ * - Modern European-style aesthetics (Tailwind + shadcn/ui)
+ * - Courses with videos, interactive activities, quizzes
+ * - Local progress & Canvas certificate generator
+ * - Works as static site -> perfect for GitHub Pages (via Vite build)
+ */
+
+// ---------- Sample data (edit freely) ----------
+const TRACKS = [
+  {
+    id: "المهارات الرقمية",
+    icon: <Shield className="w-6 h-6" />, color: "from-emerald-500 to-cyan-500",
+    intro: "تعريف بالأدوات الرقمية الضرورية للأمان والإنتاجية في المنظمات.",
+    desc: "الأمان الرقمي، التعاون السحابي، إنتاجية الفريق.",
+    lessons: [
+      { title: "مقدمة التحول الرقمي", video: "https://www.youtube.com/embed/ysz5S6PUM-U", note: "لماذا يهم التحول الرقمي؟" },
+      { title: "أمان الحسابات", video: "https://www.youtube.com/embed/dQw4w9WgXcQ", note: "سياسات كلمات المرور + التحقق الثنائي." },
+    ],
+    activities: [ { id: 0, q: "اكتب أهم 3 ممارسات أمان ستطبقها مع فريقك." } ],
+    quiz: [
+      { q: "أفضل طريقة لحماية حساباتك؟", choices: ["إعادة استخدام كلمة المرور", "تفعيل المصادقة الثنائية"], answer: 1 },
+      { q: "مشاركة الملفات الآمنة تكون عبر:", choices: ["روابط عامة دون صلاحيات", "مجلد سحابي مع صلاحيات"] , answer: 1 },
+    ],
+  },
+  {
+    id: "تحليل بيانات",
+    icon: <BarChart3 className="w-6 h-6" />, color: "from-indigo-500 to-sky-500",
+    intro: "من جمع البيانات إلى تنظيفها وعرضها بصريًا لاتخاذ قرارات أفضل.",
+    desc: "مفاهيم، تنظيف، تصور، مؤشرات.",
+    lessons: [
+      { title: "ما هي البيانات؟", video: "https://www.youtube.com/embed/aqz-KE-bpKQ", note: "أنواع البيانات ومصادرها." },
+    ],
+    activities: [ { id: 0, q: "اختر مجموعة بيانات مجتمعية واقترح 2 من المؤشرات لمتابعتها." } ],
+    quiz: [ { q: "المخطط الأنسب لمقارنة فئتين؟", choices: ["خطي", "أعمدة"], answer: 1 } ],
+  },
+];
+
+// ---------- Helpers ----------
+const LS_KEY = (k) => `naqla:${k}`;
+const loadProgress = (courseId) => {
+  try { return JSON.parse(localStorage.getItem(LS_KEY(courseId)) || "{}"); } catch { return {}; }
+};
+const saveProgress = (courseId, data) => localStorage.setItem(LS_KEY(courseId), JSON.stringify(data));
+
+function useTheme() {
+  const [theme, setTheme] = useState(() => document.documentElement.getAttribute("data-theme") || "dark");
+  useEffect(() => { document.documentElement.setAttribute("dir", "rtl"); }, []);
+  useEffect(() => { document.documentElement.setAttribute("data-theme", theme); }, [theme]);
+  return { theme, toggle: () => setTheme((t) => (t === "light" ? "dark" : "light")) };
+}
+
+// ---------- Certificate ----------
+function drawCertificate(canvas, { name, course }) {
+  const ctx = canvas.getContext("2d");
+  const W = (canvas.width = 1400), H = (canvas.height = 900);
+  ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, W, H);
+  // frame
+  ctx.strokeStyle = "#06b6d4"; ctx.lineWidth = 18; ctx.strokeRect(30, 30, W - 60, H - 60);
+  ctx.strokeStyle = "#22c55e"; ctx.lineWidth = 5; ctx.strokeRect(60, 60, W - 120, H - 120);
+  // heading
+  ctx.fillStyle = "#0f172a"; ctx.textAlign = "center"; ctx.font = "bold 84px Tajawal, system-ui";
+  ctx.fillText("شهادة إتمام", W / 2, 200);
+  ctx.font = "32px Tajawal, system-ui"; ctx.fillText("تُمنح هذه الشهادة لـ", W / 2, 290);
+  ctx.font = "bold 64px Tajawal, system-ui"; ctx.fillText(name || "مشارك/ة", W / 2, 380);
+  ctx.font = "30px Tajawal, system-ui"; ctx.fillText("لاستكماله/ا متطلبات دورة", W / 2, 450);
+  ctx.font = "bold 46px Tajawal, system-ui"; ctx.fillText(course, W / 2, 510);
+  const date = new Date().toLocaleDateString("ar-YE", { year: "numeric", month: "long", day: "numeric" });
+  ctx.font = "26px Tajawal, system-ui"; ctx.fillText(`بتاريخ ${date}`, W / 2, 570);
+  // footer
+  ctx.font = "bold 28px Tajawal, system-ui"; ctx.fillStyle = "#0f766e"; ctx.fillText("مبادرة نقلة", W / 2, 650);
+  ctx.strokeStyle = "#22c55e"; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(W - 200, 700, 55, 0, Math.PI * 2); ctx.stroke();
+  ctx.font = "bold 22px Tajawal, system-ui"; ctx.fillStyle = "#16a34a"; ctx.fillText("NAQLA", W - 200, 708);
+}
+
+// ---------- UI Blocks ----------
+function Shell({ children }) {
+  const { theme, toggle } = useTheme();
+  return (
+    <div className="min-h-screen bg-[radial-gradient(1200px_600px_at_80%_-10%,rgba(6,182,212,.10),transparent_60%),radial-gradient(900px_500px_at_0%_0%,rgba(34,197,94,.12),transparent_60%),var(--bg)] text-[var(--text)]">
+      <header className="sticky top-0 z-40 backdrop-blur-md">
+        <div className="container mx-auto px-4">
+          <nav className="my-3 flex items-center justify-between rounded-2xl border border-[var(--border)] bg-[rgba(17,24,39,.65)] p-3">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-[conic-gradient(from_210deg,var(--brand),var(--brand-2))] ring-2 ring-white/10" />
+              <div className="font-extrabold">دورات الكترونية للشباب/ات - مبادرة نقلة</div>
+              <Badge variant="outline" className="rounded-full border-emerald-500/40 text-emerald-300">مجاني</Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={toggle} className="gap-2">
+                {theme === "light" ? <Moon className="h-4 w-4"/> : <Sun className="h-4 w-4"/>}
+                الوضع
+              </Button>
+              <a href="#courses"><Button>ابدأ الآن</Button></a>
+            </div>
+          </nav>
+        </div>
+      </header>
+      {children}
+      <footer className="container mx-auto px-4 my-12 text-[var(--muted)]">
+        <div className="flex flex-wrap items-center gap-3">
+          <span>© {new Date().getFullYear()} مبادرة نقلة</span>
+          <Badge variant="outline" className="rounded-full">مفتوح المصدر</Badge>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+function Hero({ onSearch }) {
+  return (
+    <section className="container mx-auto px-4 mt-5 grid gap-6 md:grid-cols-[1.2fr_.8fr] items-center">
+      <Card className="bg-transparent border-[var(--border)] shadow-[var(--shadow)]">
+        <CardHeader>
+          <CardTitle className="text-3xl md:text-4xl font-extrabold">دورات إلكترونية مجانية للشباب/ات – مبادرة نقلة</CardTitle>
+        </CardHeader>
+        <CardContent className="text-[var(--muted)]">
+          تصميم أوروبي الطابع، محتوى عربي، تجربة سريعة تستجيب للهواتف.
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <div className="flex flex-1 min-w-[280px] items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--panel)] px-3 py-2">
+              <Search className="w-4 h-4 opacity-80"/>
+              <Input onChange={(e)=>onSearch(e.target.value)} className="bg-transparent border-none focus-visible:ring-0" placeholder="ابحث عن دورة (مثال: بيانات، تسويق، قيادة)" />
+            </div>
+            <Button variant="ghost" onClick={()=>document.getElementById("courses")?.scrollIntoView({behavior:'smooth'})}>تصفح كل الدورات</Button>
+          </div>
+        </CardContent>
+      </Card>
+      <div className="relative rounded-2xl border border-[var(--border)] bg-[var(--panel)] shadow-[var(--shadow)] min-h-[260px] grid place-items-center overflow-hidden">
+        <div className="absolute left-6 bottom-6 size-[220px] rounded-full blur-3xl opacity-60 bg-[radial-gradient(circle_at_30%_30%,var(--brand),transparent_60%)]" />
+        <div className="text-center text-[var(--muted)]">
+          <GraduationCap className="w-10 h-10 mx-auto mb-3 opacity-80"/>
+          <div className="font-bold">واجهة عربية عصرية</div>
+          <div className="text-sm opacity-80">بحث فوري • أنشطة • اختبارات • شهادات رقمية</div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CourseCard({ track, onOpen }){
+  return (
+    <Card className="border-[var(--border)] bg-[var(--card)] hover:translate-y-[-2px] transition-transform shadow-[var(--shadow)]">
+      <CardHeader className="flex flex-row items-center gap-2">
+        <div className={`grid place-items-center rounded-xl bg-gradient-to-r ${track.color} text-white w-12 h-12`}>
+          {track.icon}
+        </div>
+        <CardTitle className="font-extrabold text-lg">{track.id}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-[var(--muted)] text-sm">{track.desc}</p>
+        <div className="mt-3 flex gap-2 flex-wrap">
+          {track.lessons?.slice(0,3).map((l,i)=> (
+            <Badge key={i} variant="outline" className="rounded-full border-cyan-500/40 text-cyan-200">{l.title}</Badge>
+          ))}
+        </div>
+        <div className="mt-4">
+          <Button onClick={()=>onOpen(track)} className="gap-2"><Play className="w-4 h-4"/> عرض التفاصيل</Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function CourseDialog({ open, onOpenChange, track }){
+  const [name, setName] = useState("");
+  const canvasRef = useRef(null);
+  const progress = useMemo(()=> loadProgress(track?.id || ""), [track?.id, open]);
+  const [quizState, setQuizState] = useState(progress?.quiz || null);
+  const [activityMap, setActivityMap] = useState(progress?.activities || {});
+
+  useEffect(()=>{
+    setQuizState(progress?.quiz || null);
+    setActivityMap(progress?.activities || {});
+  }, [open]);
+
+  if(!track) return null;
+
+  const hasActivity = Object.values(activityMap||{}).some((v)=> (v||"").trim().length >= 10);
+  const pass = (quizState?.percent || 0) >= 70;
+  const canCert = hasActivity && pass;
+
+  function saveActivity(idx, val){
+    const next = { ...(activityMap||{}), [idx]: val };
+    setActivityMap(next);
+    const p = loadProgress(track.id);
+    p.activities = next; saveProgress(track.id, p);
+  }
+  function submitQuiz(){
+    let score = 0; (track.quiz||[]).forEach((q,qi)=>{
+      const v = selected[qi]; if(typeof v === "number" && v === q.answer) score++;
+    });
+    const percent = Math.round((score / (track.quiz?.length || 1)) * 100);
+    const p = loadProgress(track.id); p.quiz = { score, total: track.quiz.length, percent }; saveProgress(track.id, p);
+    setQuizState(p.quiz);
+  }
+
+  const [selected, setSelected] = useState({});
+
+  function makeCert(){
+    const c = canvasRef.current; if(!c) return;
+    drawCertificate(c, { name, course: track.id });
+    const a = document.createElement("a");
+    a.href = c.toDataURL("image/png");
+    a.download = `شهادة - ${name || "مشارك/ة"}.png`;
+    a.click();
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-[920px] bg-[var(--panel)] text-[var(--text)] border-[var(--border)]">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-extrabold flex items-center gap-2">
+            <Award className="w-5 h-5"/> {track.id}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-6 p-2">
+          <section>
+            <h4 className="font-extrabold mb-1">تعريف</h4>
+            <p className="text-[var(--muted)]">{track.intro}</p>
+          </section>
+          <section>
+            <h4 className="font-extrabold mb-2">المحتوى</h4>
+            <div className="grid gap-4">
+              {track.lessons?.map((L,i)=> (
+                <Card key={i} className="overflow-hidden border-[var(--border)]">
+                  <CardHeader className="py-3"><CardTitle className="text-base">{i+1}. {L.title}</CardTitle></CardHeader>
+                  <CardContent>
+                    {L.video && (
+                      <div className="aspect-video rounded-xl overflow-hidden ring-1 ring-white/10"><iframe className="w-full h-full" src={L.video} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen loading="lazy" title={L.title}></iframe></div>
+                    )}
+                    {L.note && <p className="mt-2 text-[var(--muted)] text-sm">{L.note}</p>}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+
+          <section>
+            <h4 className="font-extrabold mb-2">نشاط تفاعلي</h4>
+            {(track.activities||[]).map((A)=> (
+              <Card key={A.id} className="border-dashed border-[var(--border)]">
+                <CardContent className="pt-4">
+                  <p className="mb-2">{A.q}</p>
+                  <textarea defaultValue={activityMap?.[A.id]||""} onChange={(e)=>saveActivity(A.id, e.target.value)} className="min-h-[90px] w-full rounded-xl border border-[var(--border)] bg-transparent p-3 outline-none focus:ring-2 focus:ring-emerald-500/40" placeholder="اكتب إجابتك هنا"></textarea>
+                </CardContent>
+              </Card>
+            ))}
+          </section>
+
+          <section>
+            <h4 className="font-extrabold mb-2">اختبار قصير</h4>
+            {(track.quiz||[]).map((Q,qi)=> (
+              <Card key={qi} className="border-[var(--border)]">
+                <CardHeader className="py-3"><CardTitle className="text-base">سؤال {qi+1}: {Q.q}</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {Q.choices.map((c,ci)=> (
+                      <label key={ci} className="flex items-center gap-2">
+                        <input type="radio" name={`q${qi}`} onChange={()=> setSelected((s)=> ({...s, [qi]: ci}))} /> {c}
+                      </label>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            <div className="mt-3 flex items-center gap-3">
+              <Button onClick={submitQuiz}>تحقق من الإجابات</Button>
+              {quizState && (
+                <span className="text-sm flex items-center gap-1 text-[var(--muted)]">
+                  {quizState.percent >= 70 ? <CheckCircle2 className="w-4 h-4 text-emerald-400"/> : <XCircle className="w-4 h-4 text-amber-400"/>}
+                  نتيجتك: {quizState.score} من {quizState.total} ({quizState.percent}%)
+                </span>
+              )}
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-[var(--border)] p-4">
+            <h4 className="font-extrabold mb-1">الحصول على شهادة مبادرة نقلة</h4>
+            <p className="text-[var(--muted)] text-sm">يتفعّل زر الشهادة عند إكمال نشاط واحد على الأقل (≥10 كلمات) والحصول على <b>70%</b> فأكثر بالاختبار.</p>
+            <div className="my-2 flex flex-wrap items-center gap-2 text-sm">
+              <Badge variant="outline" className={"rounded-full " + (hasActivity?"border-emerald-500/40 text-emerald-300":"border-amber-500/40 text-amber-300")}>النشاط: {hasActivity?"مكتمل":"غير مكتمل"}</Badge>
+              <Badge variant="outline" className={"rounded-full " + (pass?"border-emerald-500/40 text-emerald-300":"border-amber-500/40 text-amber-300")}>الاختبار: {pass?`${quizState?.percent}%`:"أقل من 70%"}</Badge>
+            </div>
+            <div className="grid gap-2 md:grid-cols-2 mt-2">
+              <div>
+                <label className="text-sm">اسم حامل الشهادة</label>
+                <Input value={name} onChange={(e)=>setName(e.target.value)} placeholder="اكتب اسمك الثلاثي" className="mt-1 bg-transparent" />
+                <div className="mt-3 flex gap-2">
+                  <Button onClick={makeCert} disabled={!canCert} className="gap-2"><Award className="w-4 h-4"/> إنشاء الشهادة</Button>
+                  <Button variant="outline" onClick={()=>{ const p={}; saveProgress(track.id, p); setQuizState(null); setActivityMap({}); }} className="gap-2">إعادة التهيئة</Button>
+                </div>
+              </div>
+              <div className="rounded-xl border border-[var(--border)] overflow-hidden grid place-items-center min-h-[220px]">
+                <canvas ref={canvasRef} className="max-w-full hidden" />
+                <div className="text-[var(--muted)] text-sm px-4 py-10 text-center">سيظهر معاينة الشهادة هنا بعد إنشائها.</div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export default function App(){
+  const [term, setTerm] = useState("");
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(null);
+  const list = useMemo(()=>{
+    const t = term.trim().toLowerCase();
+    if(!t) return TRACKS;
+    return TRACKS.filter((x)=> x.id.toLowerCase().includes(t) || x.desc.toLowerCase().includes(t) || (x.intro||"").toLowerCase().includes(t));
+  }, [term]);
+
+  return (
+    <Shell>
+      <Hero onSearch={setTerm} />
+      <section id="courses" className="container mx-auto px-4 mt-6">
+        <h2 className="font-extrabold text-xl mb-3">الدورات المتاحة</h2>
+        {list.length === 0 ? (
+          <p className="text-[var(--muted)]">لا توجد نتائج مطابقة. جرّب كلمة أخرى.</p>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {list.map((track)=> (
+              <CourseCard key={track.id} track={track} onOpen={(t)=>{ setActive(t); setOpen(true);} } />
+            ))}
+          </div>
+        )}
+      </section>
+      <CourseDialog open={open} onOpenChange={setOpen} track={active} />
+    </Shell>
+  );
+}
