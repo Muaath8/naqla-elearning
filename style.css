@@ -81,3 +81,16 @@ footer{margin:40px 0 60px; color:var(--muted)}
 .links{display:flex; gap:14px; flex-wrap:wrap}
 a{text-decoration:none; color:#67e8f9}
 a:hover{text-decoration:underline}
+/* تقليل الخلفية الثقيلة على الموبايل */
+@media (max-width: 768px){
+  body{
+    background: var(--bg); /* ألغِ التدرجات الثقيلة */
+  }
+  .nav{
+    backdrop-filter: none;          /* ألغِ البلور */
+    background: var(--panel);       /* خلفية عادية */
+  }
+  .hero{ grid-template-columns: 1fr; }
+  .blob{ display: none; }           /* ألغِ التوهّج */
+}
+
