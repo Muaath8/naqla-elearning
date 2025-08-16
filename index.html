@@ -1,23 +1,379 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>دورات إلكترونية للشباب/ات - مبادرة نقلة</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>مبادرة نقلة – منصة الدورات</title>
+  <meta name="description" content="منصة عربية مجانية لدورات الشباب/ات العاملين في منظمات المجتمع المدني – مبادرة نقلة" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b1220; --panel:#0f172a; --card:#111827; --text:#e7eef7; --muted:#9fb0c7;
+      --brand:#0ea5e9; --accent:#22c55e; --border:rgba(148,163,184,.22); --radius:18px;
+    }
+    @media (prefers-color-scheme: light){:root{--bg:#f6f7fb;--panel:#fff;--card:#fff;--text:#0b1220;--muted:#475569;--border:rgba(15,23,42,.12)}}
+    *{box-sizing:border-box}
+    body{margin:0; font:16px/1.7 "Tajawal",system-ui; background:var(--bg); color:var(--text)}
+    a{color:#67e8f9; text-decoration:none} a:hover{text-decoration:underline}
+    .container{max-width:1200px; margin:auto; padding:22px}
+
+    header{position:sticky; top:0; z-index:40; backdrop-filter:saturate(130%) blur(8px)}
+    .nav{display:flex; gap:12px; align-items:center; justify-content:space-between; padding:12px 16px; border:1px solid var(--border); border-radius:20px; background:rgba(17,24,39,.6)}
+    .brand{display:flex; align-items:center; gap:10px}
+    .logo{inline-size:40px; block-size:40px; border-radius:12px; background:conic-gradient(from 210deg, #22c55e, #06b6d4)}
+    .title{font-weight:900}
+    .btn{cursor:pointer; border:none; border-radius:12px; padding:10px 14px; font-weight:800}
+    .btn.primary{background:var(--accent); color:#062212}
+    .btn.ghost{background:transparent; border:1px solid var(--border); color:var(--text)}
+
+    .hero{display:grid; grid-template-columns:1.2fr .8fr; gap:22px; align-items:center; margin-top:14px}
+    @media (max-width:960px){.hero{grid-template-columns:1fr}}
+    .card{background:var(--card); border:1px solid var(--border); border-radius:18px; box-shadow:0 12px 30px rgba(0,0,0,.25)}
+    .p{padding:18px}
+    .muted{color:var(--muted)}
+
+    .toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:12px 0}
+    .search{flex:1 1 320px; display:flex; align-items:center; gap:8px; border:1px solid var(--border); background:var(--panel); border-radius:12px; padding:10px}
+    .search input{flex:1; background:transparent; border:none; color:var(--text); outline:none}
+
+    .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+    @media (max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:640px){.grid{grid-template-columns:1fr}}
+    .course-card{display:flex; flex-direction:column; overflow:hidden}
+    .course-head{display:flex; gap:10px; align-items:center; padding:14px; border-bottom:1px solid var(--border)}
+    .badge{border:1px solid var(--border); border-radius:999px; padding:4px 8px; font-size:.85rem; margin-inline-start:auto}
+    .course-body{padding:14px}
+    .course-actions{display:flex; gap:8px; margin-top:10px}
+
+    dialog{max-inline-size:min(1100px, 95vw); border:none; border-radius:18px; overflow:hidden; background:var(--panel); color:var(--text)}
+    .modal-wrap{display:grid; grid-template-columns:280px 1fr; min-block-size:540px}
+    @media (max-width:900px){.modal-wrap{grid-template-columns:1fr}}
+    .sidebar{border-inline-end:1px solid var(--border); padding:14px}
+    .sidebar h4{margin:.2rem 0 .6rem}
+    .module{padding:10px; border:1px solid var(--border); border-radius:10px; margin:6px 0; background:rgba(255,255,255,.02)}
+    .progress{height:10px; border-radius:999px; background:rgba(148,163,184,.25); overflow:hidden}
+    .progress > span{display:block; height:100%; background:linear-gradient(90deg,#22c55e,#06b6d4)}
+
+    .main{padding:14px}
+    .section{margin:12px 0; border:1px solid var(--border); border-radius:14px; overflow:hidden}
+    .section > .section-head{padding:12px 14px; background:rgba(255,255,255,.03); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between}
+    .section > .section-body{padding:14px}
+    iframe{width:100%; aspect-ratio:16/9; border:0; border-radius:12px}
+    textarea{width:100%; min-height:90px; padding:10px; border:1px solid var(--border); border-radius:12px; background:transparent; color:var(--text)}
+    .quiz .q{margin:10px 0}
+    .chip{border:1px solid var(--border); padding:6px 10px; border-radius:999px; margin-inline-start:6px}
+    .ok{background:#22c55e1f; border-color:#22c55e66}
+    .warn{background:#f59e0b1a; border-color:#f59e0b66}
+
+    footer{color:var(--muted); margin:30px 0; text-align:center}
+  </style>
 </head>
 <body>
-  <header>
-    <h1>دورات إلكترونية للشباب/ات</h1>
-    <p>مبادرة نقلة - تعلم مجانًا عبر الإنترنت</p>
+  <header class="container">
+    <nav class="nav">
+      <div class="brand"><span class="logo"></span><div class="title">مبادرة نقلة – منصة الدورات</div></div>
+      <div class="actions">
+        <button class="btn ghost" onclick="document.getElementById('courses').scrollIntoView({behavior:'smooth'})">تصفّح الدورات</button>
+        <button class="btn primary" onclick="document.getElementById('courses').scrollIntoView({behavior:'smooth'})">ابدأ الآن</button>
+      </div>
+    </nav>
   </header>
 
-  <main id="courses"></main>
+  <main class="container">
+    <section class="hero">
+      <div class="card p">
+        <h1 class="title" style="font-size:clamp(1.6rem,2vw+1.1rem,2.6rem)">تعلم مجاني بالعربي – واجهة احترافية مستوحاة من منصات التعليم الأوروبية</h1>
+        <p class="muted">ابحث عن الدورة المناسبة، شاهد الدروس، أنجز النشاط، أجب عن الاختبار، وتابع تقدّمك. عند إكمال المتطلبات يمكنك إنشاء شهادة باسمك.</p>
+        <div class="toolbar" role="search">
+          <div class="search"><span>🔎</span><input id="q" placeholder="ابحث عن دورة: محاسبة، تسويق، بيانات…"></div>
+          <button class="btn ghost" onclick="render()">إظهار الكل</button>
+        </div>
+      </div>
+      <div class="card p" aria-hidden="true">
+        <div class="progress" title="نموذج لشريط التقدّم"><span style="width:65%"></span></div>
+        <p class="muted" style="margin:.6rem 0 0">تجربة تشبه صفحات المقررات (قائمة وحدات يسار + محتوى يمين).</p>
+      </div>
+    </section>
 
-  <footer>
-    <p>© 2025 مبادرة نقلة - جميع الحقوق محفوظة</p>
-  </footer>
+    <section id="courses">
+      <h2 class="title" style="font-size:1.3rem">الدورات المتاحة</h2>
+      <div class="grid" id="grid"></div>
+    </section>
 
-  <script src="script.js"></script>
+    <dialog id="dlg">
+      <div class="modal-wrap">
+        <aside class="sidebar">
+          <h4 class="title">وحدات الدورة</h4>
+          <div id="modules"></div>
+          <h4 class="title" style="margin-top:12px">التقدّم</h4>
+          <div class="progress"><span id="bar" style="width:0%"></span></div>
+        </aside>
+        <section class="main">
+          <div class="section">
+            <div class="section-head"><strong id="courseTitle">تفاصيل الدورة</strong><button class="btn ghost" onclick="dlg.close()">إغلاق ✕</button></div>
+            <div class="section-body"><p id="intro" class="muted"></p></div>
+          </div>
+          <div class="section">
+            <div class="section-head"><strong>الفيديو التعريفي</strong></div>
+            <div class="section-body"><div id="video"></div></div>
+          </div>
+          <div class="section">
+            <div class="section-head"><strong>نشاط تطبيقي</strong><span class="chip" id="actState">غير محفوظ</span></div>
+            <div class="section-body">
+              <p id="activityQ"></p>
+              <textarea id="activityA" placeholder="اكتب إجابتك هنا (10 كلمات على الأقل)"></textarea>
+              <div style="margin-top:8px; display:flex; gap:8px">
+                <button class="btn primary" onclick="saveActivity()">حفظ النشاط</button>
+                <button class="btn ghost" onclick="clearActivity()">إعادة ضبط</button>
+              </div>
+            </div>
+          </div>
+          <div class="section quiz">
+            <div class="section-head"><strong>اختبار قصير (4 أسئلة)</strong><span class="chip" id="quizState">لم يتم الحل</span></div>
+            <div class="section-body" id="quiz"></div>
+          </div>
+          <div class="section">
+            <div class="section-head"><strong>الشهادة</strong></div>
+            <div class="section-body">
+              <p class="muted">يتم تفعيل زر الشهادة عند إكمال النشاط والحصول على ≥ 70% في الاختبار.</p>
+              <div id="status"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </dialog>
+  </main>
+
+  <footer class="container">© <span id="year"></span> مبادرة نقلة</footer>
+
+  <script>
+    const dlg = document.getElementById('dlg');
+    const grid = document.getElementById('grid');
+    const q = document.getElementById('q');
+
+    // ===== بيانات: 13 دورة – لكل دورة 5 مواضيع و 4 أسئلة =====
+    const courses = [
+      {id:"المهارات الرقمية", desc:"أمان رقمي وتعاون سحابي" ,
+       intro:"تتعلم حماية الحسابات والبيانات، سياسات كلمات المرور، وإدارة الملفات سحابيًا داخل المنظمة.",
+       video:"https://www.youtube.com/embed/ysz5S6PUM-U",
+       modules:["أساسيات الإنترنت","حماية البيانات","البريد المؤسسي","التعاون السحابي","الأمن السيبراني"],
+       activity:"اكتب 3 سياسات أمان رقمية تناسب منظمتك.",
+       quiz:[
+         {q:"أفضل حماية للحسابات:",o:["إعادة استخدام كلمة المرور","تفعيل المصادقة الثنائية"],a:1},
+         {q:"مشاركة الملفات الموثوقة:",o:["روابط عامة","مجلد سحابي بصلاحيات"],a:1},
+         {q:"النسخ الاحتياطي الأفضل:",o:["يدوي عند الحاجة","دوري ومؤتمت"],a:1},
+         {q:"البريد المؤسسي يفيد في:",o:["زيادة المخاطر","النطاق الرسمي والحماية"],a:1}
+       ]},
+      {id:"المهارات الحياتية", desc:"تواصل، عمل جماعي، حل نزاعات",
+       intro:"مهارات لبيئات العمل غير الربحية: الإصغاء، التعاطف، إدارة الوقت، والتعاون لخدمة المجتمع.",
+       video:"https://www.youtube.com/embed/2Vv-BfVoq4g",
+       modules:["التواصل الفعّال","إدارة الوقت","العمل الجماعي","حل المشكلات","المرونة"],
+       activity:"صف موقفًا واقعيًا تم فيه حل نزاع داخل الفريق.",
+       quiz:[
+         {q:"أهم عنصر للتواصل:",o:["الإطالة في الكلام","الإصغاء الفعّال"],a:1},
+         {q:"تنظيم اليوم يكون عبر:",o:["الذاكرة فقط","قائمة مهام وجدولة"],a:1},
+         {q:"لفظ النزاع الصحيح:",o:["تجاهله","حوار مباشر منظم"],a:1},
+         {q:"المرونة تعني:",o:["رفض التغيير","التكيّف مع المتغيرات"],a:1}
+       ]},
+      {id:"المهارات الوظيفية", desc:"اتصال مكتوب/شفهي وإنتاجية",
+       intro:"مراسلات مهنية، اجتماعات فعّالة، وأولويات واضحة لرفع الإنتاجية داخل الفرق.",
+       video:"https://www.youtube.com/embed/lTTajzrSkCw",
+       modules:["البريد الرسمي","العروض التقديمية","الاجتماعات","إدارة الوقت","أدوات الإنتاجية"],
+       activity:"اكتب خطة يومية بثلاث أولويات واضحة.",
+       quiz:[
+         {q:"البريد الجيّد:",o:["غامض وطويل","مختصر وواضح"],a:1},
+         {q:"الاجتماع الفعّال يحتاج:",o:["بدون جدول","جدول أعمال محدد"],a:1},
+         {q:"أداة مساعدة:",o:["مفكرة/تطبيق مهام","الاعتماد على الذاكرة"],a:0},
+         {q:"الأولويات تفيد في:",o:["تشتيت الجهد","زيادة الإنجاز"],a:1}
+       ]},
+      {id:"المهارات الإدارية", desc:"حوكمة، تخطيط، متابعة وتقييم",
+       intro:"أساسيات الحوكمة، إعداد الخطط، مؤشرات الأداء، وإدارة المخاطر للمشاريع.",
+       video:"https://www.youtube.com/embed/aqz-KE-bpKQ",
+       modules:["الحوكمة","التخطيط الاستراتيجي","إدارة المخاطر","المتابعة","التقييم"],
+       activity:"اقترح 3 مؤشرات أداء لمشروعك الحالي.",
+       quiz:[
+         {q:"اللوائح والسياسات ضمن:",o:["حوكمة","تسويق"],a:0},
+         {q:"المؤشر الجيد يكون:",o:["غامض","قابل للقياس"],a:1},
+         {q:"المخاطر تُعالج عبر:",o:["تجاهل","خطة تخفيف"],a:1},
+         {q:"التقييم النهائي يقيس:",o:["الأنشطة فقط","الأثر والنتائج"],a:1}
+       ]},
+      {id:"التسويق الرقمي والإعلامي", desc:"قنوات رقمية ورسائل فعّالة",
+       intro:"بناء رسائل واضحة، إدارة المحتوى، والإعلان الرقمي لدعم حملات المنظمات.",
+       video:"https://www.youtube.com/embed/dQw4w9WgXcQ",
+       modules:["الهوية والصوت","خطة المحتوى","وسائل التواصل","الإعلانات","التحليل"],
+       activity:"اكتب 3 رسائل أساسية لحملة توعوية.",
+       quiz:[
+         {q:"أول خطوة للتسويق:",o:["نشر عشوائي","تحديد الجمهور والرسالة"],a:1},
+         {q:"قياس الأداء عبر:",o:["الانطباع الشخصي","مؤشرات وتحليلات"],a:1},
+         {q:"أفضل منشور:",o:["طويل جدًا بلا صور","مختصر بصري واضح"],a:1},
+         {q:"السمعة الرقمية تُبنى بـ:",o:["تضليل","الشفافية"],a:1}
+       ]},
+      {id:"التنمية المستدامة", desc:"أهداف التنمية وقياس الأثر",
+       intro:"تعريف بأهداف التنمية المستدامة وكيفية مواءمة مشاريع المنظمات معها.",
+       video:"https://www.youtube.com/embed/aqz-KE-bpKQ",
+       modules:["مقدمة SDGs","مواءمة المشاريع","الشراكات","البيئة","المؤشرات"],
+       activity:"اختر هدف SDG واحد واربطه بنشاط منظمتك.",
+       quiz:[
+         {q:"عدد أهداف SDGs:",o:["17","10"],a:0},
+         {q:"المواءمة تعني:",o:["عمل منفصل","ربط الأهداف بالأنشطة"],a:1},
+         {q:"الشراكات مهمة لأنها:",o:["تزيد التكلفة","تعظّم الأثر"],a:1},
+         {q:"مؤشر جيد يجب أن يكون:",o:["غير قابل للقياس","محدد وقابل للقياس"],a:1}
+       ]},
+      {id:"ريادة الأعمال", desc:"أفكار مستدامة ونماذج عمل",
+       intro:"صياغة القيمة، نموذج العمل، واختبار الفرضيات للمشاريع المجتمعية.",
+       video:"https://www.youtube.com/embed/aqz-KE-bpKQ",
+       modules:["القيمة المقترحة","العملاء","القنوات","التكاليف","الإيرادات"],
+       activity:"اكتب نموذج عمل مبسّط لمبادرة دخل.",
+       quiz:[
+         {q:"نموذج العمل يصف:",o:["الهوية فقط","كيف تُخلق وتُقدَّم القيمة"],a:1},
+         {q:"اختبار الفرضيات يتم عبر:",o:["الانطباع","مقابلات وتجارب"],a:1},
+         {q:"القيمة المقترحة الجيدة:",o:["غامضة","تحل مشكلة واضحة"],a:1},
+         {q:"الاستدامة تتطلب:",o:["لا تمويل","تنويع مصادر"],a:1}
+       ]},
+      {id:"الذكاء الاصطناعي", desc:"مفاهيم وتطبيقات غير ربحية",
+       intro:"أتمتة مهام متكررة، تلخيص، تحليل نصوص، مع مراعاة الخصوصية وأخلاقيات الاستخدام.",
+       video:"https://www.youtube.com/embed/ysz5S6PUM-U",
+       modules:["المبادئ","حالات الاستخدام","الخصوصية","الأخلاقيات","الأدوات"],
+       activity:"اذكر مهمتين يمكن أتمتتهما بالذكاء الاصطناعي.",
+       quiz:[
+         {q:"ينبغي حماية:",o:["البيانات الحساسة","لا حاجة"],a:0},
+         {q:"مثال حالة استخدام:",o:["إلغاء التوثيق","تلخيص تقارير"],a:1},
+         {q:"تحيز النماذج يعني:",o:["عدالة كاملة","نتائج غير منصفة"],a:1},
+         {q:"قبل الاعتماد على AI:",o:["تجاهل مراجعة البشر","مراجعة بشرية عند اللزوم"],a:1}
+       ]},
+      {id:"التلمذة المهنية", desc:"تعلم بالممارسة والتوجيه",
+       intro:"تصميم برامج تلمذة داخلية: أهداف واضحة، خطة تعلم، وتقييم مستمر.",
+       video:"https://www.youtube.com/embed/aqz-KE-bpKQ",
+       modules:["تحديد الأهداف","خطة التعلم","المهام العملية","الإشراف","التقييم"],
+       activity:"اكتب أهدافًا قابلة للقياس لمتدرب جديد.",
+       quiz:[
+         {q:"هدف جيّد يكون:",o:["عام","محدد وقابل للقياس"],a:1},
+         {q:"التعلّم الأفضل:",o:["نظري فقط","بالممارسة مع إشراف"],a:1},
+         {q:"التقييم المستمر يساعد في:",o:["تأخير التحسين","تحسين المسار"],a:1},
+         {q:"التغذية الراجعة يجب أن تكون:",o:["غامضة","بناءة"],a:1}
+       ]},
+      {id:"المحاسبة لغير المحاسبين", desc:"مبادئ مالية مبسطة",
+       intro:"مفاهيم أساسية: القيود، التقارير، الميزانية، والشفافية للمشاريع غير الربحية.",
+       video:"https://www.youtube.com/embed/aqz-KE-bpKQ",
+       modules:["المصطلحات","القيود","الميزانية","التقارير","التدقيق"],
+       activity:"اقترح نموذج تتبع نفقات مشروع صغير.",
+       quiz:[
+         {q:"الغرض من الميزانية:",o:["زينة","تخطيط الرقابة"],a:1},
+         {q:"الشفافية المالية تعني:",o:["حجب المعلومات","تقارير واضحة"],a:1},
+         {q:"قيد اليومية هو:",o:["مستند تسويق","تسجيل عملية مالية"],a:1},
+         {q:"التدقيق يساعد على:",o:["إخفاء الأخطاء","تحسين الضبط"],a:1}
+       ]},
+      {id:"مهارات الحاسوب", desc:"نظم التشغيل ومهارات أوفيس",
+       intro:"التعامل مع الملفات، الطباعة، الجداول، العروض، والاختصارات التي تسرّع العمل.",
+       video:"https://www.youtube.com/embed/ysz5S6PUM-U",
+       modules:["إدارة الملفات","الطباعة","Word","Excel","PowerPoint"],
+       activity:"أنشئ قالب محضر اجتماع مختصر.",
+       quiz:[
+         {q:"اختصار النسخ:",o:["Ctrl+C","Ctrl+X"],a:0},
+         {q:"الجداول تُنشأ في:",o:["Excel","PowerPoint"],a:0},
+         {q:"تنسيق نص في Word:",o:["غير ممكن","ممكن بسهولة"],a:1},
+         {q:"أفضل حفظ ملفاتك في:",o:["سطح المكتب فقط","مجلد منظم أو سحابة"],a:1}
+       ]},
+      {id:"جرافيكس وتصميم", desc:"مبادئ التصميم غير الربحي",
+       intro:"أساسيات الهوية البصرية، الألوان، الخطوط، وقوالب جاهزة للحملات.",
+       video:"https://www.youtube.com/embed/dQw4w9WgXcQ",
+       modules:["نظرية اللون","الخطوط العربية","التخطيط البصري","قوالب شبكات","التصدير"],
+       activity:"صمّم بطاقة توعوية باستخدام قالب مجاني.",
+       quiz:[
+         {q:"التباين الجيد يساعد على:",o:["تشتيت","وضوح"],a:1},
+         {q:"الهوية البصرية تتضمن:",o:["الصوت فقط","اللون والخط والشعار"],a:1},
+         {q:"حجم مناسب للشبكات:",o:["عشوائي","وفق الدليل"],a:1},
+         {q:"نص طويل على تصميم:",o:["ممتاز","يضعف القراءة"],a:1}
+       ]},
+      {id:"تحليل بيانات", desc:"من البيانات إلى القرارات",
+       intro:"جمع وتنظيف وتحليل بصري لمتابعة الأثر وإعداد تقارير للممولين.",
+       video:"https://www.youtube.com/embed/aqz-KE-bpKQ",
+       modules:["مصادر البيانات","التنظيف","التحليل","التصور","المؤشرات"],
+       activity:"اقترح لوحة مؤشرات من 3 رسوم لمشروعك.",
+       quiz:[
+         {q:"قبل التصور ينبغي:",o:["تزيين","تنظيف البيانات"],a:1},
+         {q:"أفضل مقارنة فئات:",o:["خطّي","أعمدة"],a:1},
+         {q:"CSV هو:",o:["صور","جداول نصية"],a:1},
+         {q:"المؤشر الجيد:",o:["غير قابل للقياس","قابل للقياس"],a:1}
+       ]}
+    ];
+
+    function card(c){
+      const el = document.createElement('article');
+      el.className = 'card course-card';
+      el.innerHTML = `<div class="course-head"><strong>${c.id}</strong><span class="badge">${c.modules.length} وحدات</span></div>
+        <div class="course-body"><p class="muted">${c.desc}</p>
+          <div class="course-actions"><button class="btn primary">عرض الدورة</button></div>
+        </div>`;
+      el.querySelector('button').addEventListener('click',()=>openCourse(c));
+      return el;
+    }
+
+    function render(){
+      grid.innerHTML='';
+      const term=(q?.value||'').toLowerCase().trim();
+      (term?courses.filter(c=>[c.id,c.desc,c.intro].join(' ').toLowerCase().includes(term)):courses)
+        .forEach(c=>grid.append(card(c)));
+    }
+
+    // ===== نافذة الدورة =====
+    let activeCourse = null;
+    function openCourse(c){
+      activeCourse = c;
+      document.getElementById('courseTitle').textContent = c.id;
+      document.getElementById('intro').textContent = c.intro;
+      document.getElementById('modules').innerHTML = c.modules.map((m,i)=>`<div class='module'>${i+1}. ${m}</div>`).join('');
+      document.getElementById('video').innerHTML = `<iframe src='${c.video}' loading='lazy' allowfullscreen title='${c.id}'></iframe>`;
+      document.getElementById('activityQ').textContent = c.activity;
+      document.getElementById('activityA').value = loadAct(c.id);
+      document.getElementById('actState').textContent = loadAct(c.id).length>=10? 'محفوظ ✅':'غير محفوظ';
+      renderQuiz(c);
+      updateStatus();
+      dlg.showModal();
+    }
+
+    function renderQuiz(c){
+      const box = document.getElementById('quiz');
+      box.innerHTML = c.quiz.map((Q,qi)=>`<div class='q'><strong>${qi+1}. ${Q.q}</strong><br>
+        ${Q.o.map((opt,oi)=>`<label><input type='radio' name='q${qi}' value='${oi}'> ${opt}</label>`).join('<br>')} </div>`).join('') +
+        `<div style='margin-top:8px; display:flex; gap:8px'><button class='btn primary' onclick='grade()'>تحقق من الإجابات</button><span id='quizMsg' class='muted'></span></div>`;
+    }
+
+    function grade(){
+      const c = activeCourse; let score = 0;
+      c.quiz.forEach((Q,qi)=>{ const v = document.querySelector(`input[name=q${qi}]:checked`); if(v && Number(v.value)===Q.a) score++; });
+      const pct = Math.round((score/c.quiz.length)*100);
+      localStorage.setItem(`naqla:quiz:${c.id}`, JSON.stringify({score, total:c.quiz.length, pct}));
+      document.getElementById('quizMsg').textContent = `نتيجتك: ${score} من ${c.quiz.length} (${pct}%)`;
+      updateStatus();
+    }
+
+    function saveActivity(){
+      const c = activeCourse; const v = document.getElementById('activityA').value.trim();
+      localStorage.setItem(`naqla:act:${c.id}`, v);
+      document.getElementById('actState').textContent = v.length>=10? 'محفوظ ✅':'غير محفوظ';
+      updateStatus();
+    }
+    function clearActivity(){ document.getElementById('activityA').value=''; saveActivity(); }
+    function loadAct(id){ return localStorage.getItem(`naqla:act:${id}`)||''; }
+
+    function updateStatus(){
+      const c = activeCourse; if(!c) return;
+      const actOk = (localStorage.getItem(`naqla:act:${c.id}`)||'').trim().length>=10;
+      const quiz = JSON.parse(localStorage.getItem(`naqla:quiz:${c.id}`)||'null');
+      const pass = quiz?.pct>=70; const pct = Math.round((actOk?50:0) + (pass?50:0));
+      document.getElementById('bar').style.width = pct+'%';
+      document.getElementById('quizState').textContent = quiz? `${quiz.pct}%` : 'لم يتم الحل';
+      document.getElementById('status').innerHTML = `<span class='chip ${actOk?'ok':'warn'}'>النشاط: ${actOk?'مكتمل':'غير مكتمل'}</span>
+        <span class='chip ${pass?'ok':'warn'}'>الاختبار: ${pass?quiz.pct+'%':'أقل من 70%'}</span>`;
+    }
+
+    // init
+    render();
+    q?.addEventListener('input', render);
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
