@@ -3,105 +3,61 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>دورات إلكترونية للشباب/ات - مبادرة نقلة</title>
-  <meta name="description" content="منصة عربية مجانية لدورات الشباب/ات العاملين في منظمات المجتمع المدني – مبادرة نقلة" />
+  <title>مبادرة نقلة – الدورات</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="container">
-    <nav class="nav">
-      <a class="brand" href="#"><span class="logo" aria-hidden="true"></span><span class="brand-title">مبادرة نقلة – منصة الدورات</span></a>
-      <div class="actions">
-        <button id="toggleTheme" class="btn secondary" aria-pressed="false" title="تبديل الوضع">🌗 الوضع</button>
-        <a class="btn" href="#courses">ابدأ الآن</a>
-      </div>
-    </nav>
-
-    <section class="hero">
-      <div class="hero-card">
-        <h1 class="title">تعلم مجاني بالعربي – تسلسل احترافي للوحدات</h1>
-        <p class="lead">شاهد الفيديو ثم الاختبار، وانتقل للوحدة التالية عبر زر <strong>التالي</strong>. تقدّمك محفوظ على جهازك.</p>
-        <div class="toolbar" role="search">
-          <div class="search">
-            <span aria-hidden="true">🔎</span>
-            <input id="q" type="search" placeholder="ابحث: محاسبة، تسويق، بيانات، ذكاء..." autocomplete="off">
-          </div>
-          <button class="btn ghost" onclick="document.getElementById('courses').scrollIntoView({behavior:'smooth'})">تصفّح جميع الدورات</button>
-        </div>
-      </div>
-      <div class="hero-visual" aria-hidden="true">
-        <div class="blob"></div>
-        <svg viewBox="0 0 520 320" width="100%" height="100%">
-          <defs><linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#22c55e"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
-          <rect x="0" y="0" width="520" height="320" rx="22" fill="url(#g1)" opacity="0.18" />
-          <g fill="none" stroke="#67e8f9" opacity=".6">
-            <rect x="40" y="40" width="440" height="240" rx="16"/>
-            <circle cx="120" cy="100" r="32"/>
-            <rect x="180" y="80" width="240" height="20" rx="10"/>
-            <rect x="180" y="110" width="200" height="16" rx="8"/>
-            <rect x="60" y="180" width="400" height="60" rx="12"/>
-          </g>
-        </svg>
-      </div>
-    </section>
-  </header>
-
-  <main class="container">
-    <section id="courses">
-      <h2 class="title sec-title">الدورات المتاحة</h2>
-      <div id="grid" class="grid"></div>
-    </section>
-
-    <!-- نافذة الدورة (تسلسل: فيديو -> اختبار -> التالي) -->
-    <dialog id="courseModal" aria-labelledby="modalTitle">
-      <div class="modal-head">
-        <div>
-          <h3 id="modalTitle" class="title" style="margin:0 0 4px">تفاصيل الدورة</h3>
-          <div class="muted"><span id="unitIndex">الوحدة 1</span> · <span id="progressText">0%</span></div>
-        </div>
-        <button id="closeModal" class="close">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="flow">
-          <aside class="flow-sidebar">
-            <h4 class="title">وحدات الدورة</h4>
-            <ol id="unitList" class="unit-list"></ol>
-          </aside>
-          <section class="flow-main">
-            <div class="section">
-              <div class="section-head"><strong id="sectionTitle">الفيديو</strong></div>
-              <div class="section-body" id="stageBody"></div>
-            </div>
-
-            <div class="section">
-              <div class="section-head"><strong>التنقل</strong></div>
-              <div class="section-body nav-row">
-                <button class="btn secondary" id="prevBtn">السابق</button>
-                <button class="btn" id="nextBtn">التالي</button>
-                <div class="progress"><span id="bar" style="width:0%"></span></div>
-              </div>
-            </div>
-
-            <div class="section">
-              <div class="section-head"><strong>حالة الإنجاز</strong></div>
-              <div class="section-body" id="statusRow"></div>
-            </div>
-          </section>
-        </div>
-      </div>
-    </dialog>
-  </main>
-
-  <footer class="container">
-    <div class="links">
-      <span>© <span id="year"></span> مبادرة نقلة</span>
-      <a href="#">يعمل على GitHub Pages</a>
+<header class="container">
+  <nav class="nav">
+    <a class="brand" href="#"><span class="logo"></span><span class="brand-title">مبادرة نقلة – منصة الدورات</span></a>
+    <div class="actions">
+      <button id="toggleTheme" class="btn secondary" aria-pressed="false">🌗 الوضع</button>
     </div>
-  </footer>
+  </nav>
+  <section class="hero">
+    <div class="hero-card">
+      <h1 class="title">الدورات الإلكترونية للشباب/ات</h1>
+      <p class="lead">اختر دورتك ثم أكمل الوحدات بالتسلسل بدون تعليق.</p>
+      <div class="toolbar" role="search">
+        <div class="search"><span>🔎</span><input id="q" placeholder="ابحث: محاسبة، تسويق، بيانات، ذكاء..." autocomplete="off"></div>
+        <button class="btn ghost" id="showAll">إظهار الكل</button>
+      </div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="blob"></div>
+      <svg viewBox="0 0 520 320" width="100%" height="100%">
+        <defs><linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#22c55e"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
+        <rect x="0" y="0" width="520" height="320" rx="22" fill="url(#g1)" opacity="0.18" />
+        <g fill="none" stroke="#67e8f9" opacity=".6">
+          <rect x="40" y="40" width="440" height="240" rx="16"/>
+          <circle cx="120" cy="100" r="32"/>
+          <rect x="180" y="80" width="240" height="20" rx="10"/>
+          <rect x="180" y="110" width="200" height="16" rx="8"/>
+          <rect x="60" y="180" width="400" height="60" rx="12"/>
+        </g>
+      </svg>
+    </div>
+  </section>
+</header>
 
-  <script src="script.js"></script>
+<main class="container">
+  <section id="courses">
+    <h2 class="title sec-title">الدورات المتاحة</h2>
+    <div id="grid" class="grid"></div>
+  </section>
+</main>
+
+<footer class="container">
+  <div class="links">
+    <span>© <span id="year"></span> مبادرة نقلة</span>
+    <a href="#">GitHub Pages</a>
+  </div>
+</footer>
+
+<script src="data.js"></script>
+<script src="main.js"></script>
 </body>
 </html>
