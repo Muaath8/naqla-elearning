@@ -114,41 +114,124 @@
   const course = COURSES.find(c => c.id === courseId) || COURSES[0];
   document.getElementById('courseTitle').textContent = course.id;
 
-  // ——— أدوات فيديو خفيف (صورة + زر تشغيل → iframe) ———
-  function getYouTubeId(u){
-    if(!u) return "";
+  /* ====== تشغيل فيديو محسّن: YouTube + Vimeo + MP4 مع رابط احتياطي وكشف فشل ====== */
+  function detectProvider(url){
+    if(!url) return {type:'unknown'};
     try{
-      const url = new URL(u);
-      if(url.hostname.includes('youtu.be')) return url.pathname.slice(1);
-      if(url.searchParams.get('v')) return url.searchParams.get('v');
-      const m = url.pathname.match(/embed\/([^/?#]+)/);
-      return m ? m[1] : "";
-    }catch{ return String(u); }
+      const u = new URL(url, location.href);
+      const host = u.hostname;
+      if(host.includes('youtube') || host.includes('youtu.be')) return {type:'youtube', url:u.href};
+      if(host.includes('vimeo.com')) return {type:'vimeo', url:u.href};
+      if(/\.(mp4|webm|ogg)(\?|#|$)/i.test(u.pathname)) return {type:'html5', url:u.href};
+      if(/^[A-Za-z0-9_-]{11}$/.test(url)) return {type:'youtube', url:'https://www.youtube.com/watch?v='+url};
+      return {type:'unknown', url:u.href};
+    }catch{
+      if(/^[A-Za-z0-9_-]{11}$/.test(url)) return {type:'youtube', url:'https://www.youtube.com/watch?v='+url};
+      return {type:'unknown', url:String(url)};
+    }
   }
-  function renderVideo(container, urlOrId, title){
-    const id = getYouTubeId(urlOrId);
-    const thumb = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
-    const watch = `https://www.youtube.com/watch?v=${id}`;
-    container.innerHTML = `
-      <div class="meta" style="margin-bottom:8px">
-        لو تعذّر التشغيل هنا، <a href="${watch}" target="_blank" rel="noopener">افتح الفيديو على يوتيوب</a>.
-      </div>
-      <div class="yt-holder" style="position:relative;max-width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000">
+  function ytIdFrom(url){
+    try{
+      const u = new URL(url);
+      if(u.hostname.includes('youtu.be')) return u.pathname.slice(1);
+      if(u.searchParams.get('v')) return u.searchParams.get('v');
+      const m = u.pathname.match(/embed\/([^/?#]+)/);
+      return m ? m[1] : '';
+    }catch{
+      return /^[A-Za-z0-9_-]{11}$/.test(url) ? url : '';
+    }
+  }
+  function guessMime(u){
+    if(/\.mp4(\?|#|$)/i.test(u)) return 'video/mp4';
+    if(/\.webm(\?|#|$)/i.test(u)) return 'video/webm';
+    if(/\.ogg(\?|#|$)/i.test(u)) return 'video/ogg';
+    return 'video/mp4';
+  }
+  function attachLoadFailGuard(holder){
+    const iframe = holder.querySelector('iframe');
+    if(!iframe) return;
+    let loaded = false;
+    const t = setTimeout(()=>{
+      if(loaded) return;
+      const help = document.createElement('div');
+      help.className = 'meta';
+      help.style.marginTop = '8px';
+      help.innerHTML = 'لو لم يبدأ التشغيل، استخدم الرابط الاحتياطي بالأعلى أو جرّب شبكة/متصفح آخر.';
+      holder.parentElement.appendChild(help);
+    }, 7000);
+    iframe.addEventListener('load', ()=>{ loaded = true; clearTimeout(t); }, {once:true});
+  }
+  function renderVideo(container, rawUrl, title){
+    const info = detectProvider(rawUrl);
+    container.innerHTML = '';
+
+    const external = document.createElement('div');
+    external.className = 'meta';
+    external.style.marginBottom = '8px';
+    external.innerHTML = `لو تعذّر التشغيل، <a id="extLink" target="_blank" rel="noopener">افتح الفيديو في تبويب جديد</a>.`;
+    container.appendChild(external);
+
+    const holder = document.createElement('div');
+    holder.className = 'yt-holder';
+    holder.style.cssText = 'position:relative;max-width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000';
+    container.appendChild(holder);
+
+    let thumb = '', play = null, openUrl = info.url;
+
+    if(info.type === 'youtube'){
+      const id = ytIdFrom(info.url);
+      thumb = id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : '';
+      openUrl = `https://www.youtube.com/watch?v=${id}`;
+      play = () => {
+        holder.innerHTML = `<iframe
+          src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1"
+          loading="lazy"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen title="${title}"></iframe>`;
+        attachLoadFailGuard(holder);
+      };
+    } else if(info.type === 'vimeo'){
+      const m = info.url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+      const vid = m ? m[1] : '';
+      openUrl = info.url;
+      play = () => {
+        holder.innerHTML = `<iframe
+          src="https://player.vimeo.com/video/${vid}?autoplay=1&title=0&byline=0&portrait=0"
+          loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowfullscreen title="${title}"></iframe>`;
+        attachLoadFailGuard(holder);
+      };
+    } else if(info.type === 'html5'){
+      openUrl = info.url;
+      play = () => {
+        holder.innerHTML = `<video controls playsinline style="width:100%;height:100%">
+          <source src="${info.url}" type="${guessMime(info.url)}">
+          متصفحك لا يدعم تشغيل الفيديو.
+        </video>`;
+      };
+    } else {
+      holder.innerHTML = `<div class="meta">هذا الرابط غير مدعوم للتضمين. استخدم الرابط أعلاه.</div>`;
+      document.getElementById('extLink').href = openUrl;
+      return;
+    }
+
+    if(thumb){
+      holder.innerHTML = `
         <img src="${thumb}" alt="Preview" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy">
         <button class="yt-play" aria-label="تشغيل الفيديو"
           style="position:absolute;inset:0;margin:auto;width:68px;height:68px;border:none;border-radius:50%;
-                 background:rgba(255,255,255,.9);cursor:pointer;display:grid;place-items:center">▶</button>
-      </div>`;
-    const btn = container.querySelector('.yt-play');
-    btn.addEventListener('click', ()=>{
-      container.innerHTML = `
-        <iframe
-          src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1"
-          loading="lazy"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowfullscreen title="${title}"></iframe>`;
-    });
+                 background:rgba(255,255,255,.9);cursor:pointer;display:grid;place-items:center">▶</button>`;
+      holder.querySelector('.yt-play').addEventListener('click', play);
+    }else{
+      holder.style.cursor = 'pointer';
+      holder.addEventListener('click', play, {once:true});
+      holder.innerHTML = `<div style="width:100%;height:100%;display:grid;place-items:center;color:#e7eef7">انقر للتشغيل ▶</div>`;
+    }
+    document.getElementById('extLink').href = openUrl;
   }
+  /* ====== /نهاية تشغيل الفيديو ====== */
 
   // حالة الدورة
   let uIndex = 0;      // رقم الوحدة
@@ -262,9 +345,8 @@
     const ctx = certCanvas.getContext('2d');
     const W = certCanvas.width, H = certCanvas.height;
 
-    // خلفية
+    // خلفية وإطار
     ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,W,H);
-    // إطار زخرفي
     ctx.strokeStyle = '#06b6d4'; ctx.lineWidth = 16; ctx.strokeRect(24,24,W-48,H-48);
     ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 4; ctx.strokeRect(48,48,W-96,H-96);
 
@@ -293,7 +375,7 @@
     ctx.fillStyle = '#0f766e';
     ctx.fillText('مبادرة نقلة', W/2, 560);
 
-    // تذييل وتوقيع/ختم رمزي
+    // توقيع/ختم رمزي
     ctx.fillStyle = '#0f172a';
     ctx.textAlign = 'left';
     ctx.font = '22px Tajawal, system-ui';
