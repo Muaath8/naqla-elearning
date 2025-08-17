@@ -88,6 +88,14 @@ footer{margin:40px 0 60px; color:var(--muted)}
 a{text-decoration:none; color:#67e8f9}
 a:hover{text-decoration:underline}
 
+/* شرائح الحالة + الشهادة */
+.chip{border:1px solid var(--border); padding:6px 10px; border-radius:999px}
+.ok{background:#22c55e1f; border-color:#22c55e66}
+.warn{background:#f59e0b1a; border-color:#f59e0b66}
+.cert-box{border:1px solid var(--border); border-radius:12px; padding:12px}
+.cert-preview canvas{max-width:100%}
+input[type="text"]{width:100%; padding:10px; border-radius:10px; border:1px solid var(--border); background:transparent; color:var(--text);}
+
 /* خفض المؤثرات على الجوال */
 @media (max-width: 768px){
   body{ background: var(--bg); }
